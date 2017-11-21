@@ -42,7 +42,7 @@ def _generate_object_annotation(obj_name, bbox):
 
     return obj
 
-def generate_pascalvoc_annotation_from_image(img, obj_names, bboxes, file_path):
+def generate_pascalvoc_annotation_from_image(img, obj_names, bboxes, file_path, overwrite=False):
     """
     Generates a Pascal VOC annotation file for `img` with the specified parameters
 
@@ -56,6 +56,8 @@ def generate_pascalvoc_annotation_from_image(img, obj_names, bboxes, file_path):
         Bounding boxes for each object present in the image
     file_path: str
         Path which the annotation file will be written to
+    overwrite: bool, optional
+        Optional parameter specifying if an existing annotations should be overwritten, defaults to False
     """
     height, width, depth = img.shape
 
@@ -70,12 +72,13 @@ def generate_pascalvoc_annotation_from_image(img, obj_names, bboxes, file_path):
     for obj_name, bbox in zip(obj_names, bboxes):
         root.append(_generate_object_annotation(obj_name, bbox))
 
-    assert not os.path.exists(file_path), 'generate_pascalvoc_annotation_from_image(): %s already exists!' % (file_path,)
+    if not overwrite:
+        assert not os.path.exists(file_path), 'generate_pascalvoc_annotation_from_image(): %s already exists!' % (file_path,)
 
     with open(file_path, 'wb') as out_file:
         out_file.write(etree.tostring(root, pretty_print=True))
 
-def generate_pascvalvoc_annotation_from_image_file(img_path, obj_names, bboxes, annotation_dir=None):
+def generate_pascvalvoc_annotation_from_image_file(img_path, obj_names, bboxes, annotation_dir=None, overwrite=False):
     """
     Generates a Pascal VOC annotation file for `img_path` with the specified parameters
 
@@ -89,6 +92,8 @@ def generate_pascvalvoc_annotation_from_image_file(img_path, obj_names, bboxes, 
         Bounding boxes for each object present in the image
     annotation_dir: str, optional
         Optional parameter specifying a folder to store the annotation file in
+    overwrite: bool, optional
+        Optional parameter specifying if an existing annotations should be overwritten, defaults to False
     """
 
     img_file_name, img_extension = os.path.splitext(img_path)
@@ -96,7 +101,7 @@ def generate_pascvalvoc_annotation_from_image_file(img_path, obj_names, bboxes, 
     assert img is not None, 'generate_pascvalvoc_annotation_from_image_file(): could not read image at %s' % (img_path,)
     
     if annotation_dir is None:
-        generate_pascalvoc_annotation_from_image(img, obj_names, bboxes, img_file_name + '.xml')
+        generate_pascalvoc_annotation_from_image(img, obj_names, bboxes, img_file_name + '.xml', overwrite=overwrite)
     else:
         img_folder = os.path.dirname(img_file_name)
         img_name = os.path.basename(img_file_name)
@@ -105,7 +110,7 @@ def generate_pascvalvoc_annotation_from_image_file(img_path, obj_names, bboxes, 
         if not os.path.exists(annotation_folder):
             os.mkdir(annotation_folder)
         
-        generate_pascalvoc_annotation_from_image(img, obj_names, bboxes, os.path.join(annotation_folder, img_name) + '.xml')
+        generate_pascalvoc_annotation_from_image(img, obj_names, bboxes, os.path.join(annotation_folder, img_name) + '.xml', overwrite=overwrite)
 
 
 if __name__ == '__main__':
