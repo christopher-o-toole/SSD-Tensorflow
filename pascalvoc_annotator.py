@@ -75,7 +75,7 @@ class PascalVOCAnnotator():
     def _remove_annotation_file_when_empty(self):
         if hasattr(self, '_index'):
             annotation_file_path = os.path.join(self.annotation_dir, os.path.basename(os.path.splitext(self.cur_img_path)[0]) + '.xml')
-            if not self._cur_bboxes or not self._cur_labels and os.path.isfile(annotation_file_path):
+            if (not self._cur_bboxes or not self._cur_labels) and os.path.isfile(annotation_file_path):
                 os.remove(annotation_file_path)
 
     def _undo(self):
